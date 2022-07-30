@@ -1,24 +1,44 @@
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 #include <Udp.h>
 
 #define SEVENZYYEARS 2208988800UL
 #define NTP_PACKET_SIZE 48
+
+#ifndef NTP_SERVER
+#define NTP_SERVER (const char*)"pool.ntp.org"
+#endif
+
+#ifdef NTP_LOCAL_PORT
+#define NTP_DEFAULT_LOCAL_PORT NTP_LOCAL_PORT
+#endif
+
+#ifndef NTP_LOCAL_PORT
 #define NTP_DEFAULT_LOCAL_PORT 1337
+#define NTP_LOCAL_PORT NTP_DEFAULT_LOCAL_PORT
+#endif
+
+#ifndef NTP_REFRESH
+#define NTP_REFRESH 3600
+#endif
+
+#ifndef NTP_TZ
+#define NTP_TZ 0
+#endif
 
 class NTPClient {
   private:
     UDP*          _udp;
     bool          _udpSetup       = false;
 
-    const char*   _poolServerName = "pool.ntp.org"; // Default time server
+    const char*   _poolServerName = NTP_SERVER; // Default time server
     IPAddress     _poolServerIP;
     unsigned int  _port           = NTP_DEFAULT_LOCAL_PORT;
-    long          _timeOffset     = 0;
+    long          _timeOffset     = NTP_TZ;
 
-    unsigned long _updateInterval = 60000;  // In ms
+    unsigned long _updateInterval = NTP_REFRESH * 100;  // In ms
 
     unsigned long _currentEpoc    = 0;      // In s
     unsigned long _lastUpdate     = 0;      // In ms
